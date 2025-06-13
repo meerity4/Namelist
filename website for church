@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Guest Check-In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .checked-in {
+            background-color: #d4edda;
+        }
+
+        button {
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Guest Check-In</h2>
+    <input type="text" id="search" placeholder="Search by name...">
+    <table id="guestTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Table</th>
+                <th>Check-In</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // ORIGINAL GUEST LIST - This is your base list.
+        // I've also fixed the two missing commas you had before.
+        const originalGuests = [
+            { name: "HG. Bishop Boulos", table: "Table of honor" },
+            { name: "Fr. Mousa", table: "Table of honor" },
+            { name: "Tasoni Margo", table: "Table of honor" },
+            { name: "Uncle Mina (future priest)", table: "Table of honor" },
+            { name: "Tasoni Maggy", table: "Table of honor" },
+            { name: "Mark Youssef", table: "Table of honor" },
+            { name: "Fr. Tadros El Masry", table: "Table 1" },
+            { name: "Tasoni Myriam Ghobriel", table: "Table 1" },
+            { name: "Fr. Raphael Bichara", table: "Table 1" },
+            { name: "Tasoni Elham Guirguis", table: "Table 1" },
+            { name: "Fr Marcos Kirellos", table: "Table 1" },
+            { name: "Tasoni Sylvia Khalil", table: "Table 1" },
+            { name: "Fr. Victor Nasr", table: "Table 1" },
+            { name: "Tasoni Eriny Morgan", table: "Table 1" },
+            { name: "Fr. Moses Hadgu", table: "Table 2" },
+            { name: "Fr. Kyrillos Mourad", table: "Table 2" },
+            { name: "Fr. Ibrahim Azer", table: "Table 2" },
+            { name: "Fr. Michael Todary", table: "Table 2" },
+            { name: "Tasoni Lydia Todary", table: "Table 2" },
+            { name: "Grace Todary", table: "Table 2" },
+            { name: "Christian Todary", table: "Table 2" },
+            { name: "Theo Todary", table: "Table 2" },
+            { name: "Fr. Youhanna", table: "Table 3" },
+            { name: "Fr. Isaac", table: "Table 3" },
+            { name: "Bola alkomos Isaac", table: "Table 3" },
+            { name: "Fr. Arseny Aziz", table: "Table 3" },
+            { name: "Fr Marcos Abdel Messih", table: "Table 3" },
+            { name: "Fr. Antonious Zikry", table: "Table 3" },
+            { name: "Robert Andrawes", table: "Table 3" },
+            { name: "Gilane Awadalla", table: "Table 3" },
+            { name: "Karas Andrawes", table: "Table 3" },
+            { name: "Medhat Morcos", table: "Table 4" },
+            { name: "Gihane Tadros", table: "Table 4" },
+            { name: "Deacon Kirollos", table: "Table 4" },
+            { name: "Nadia Youssef", table: "Table 4" },
+            { name: "Amir Morcos", table: "Table 4" },
+            { name: "Mary Gameel", table: "Table 4" },
+            { name: "Michael Mourad", table: "Table 4" },
+            { name: "Nabil Khalil (Dn. Mina)", table: "Table 5" },
+            { name: "Samy Awad (Dn. Maximus)", table: "Table 5" },
+            { name: "Mariana Dimetry", table: "Table 5" },
+            { name: "Barbara Andraws", table: "Table 5" },
+            { name: "Yousri Hanna (Dn. Mina)", table: "Table 5" },
+            { name: "Mona Gerges", table: "Table 5" },
+            { name: "Beshoy Atalla", table: "Table 5" },
+            { name: "Madonna Ibrahim", table: "Table 5" },
+            { name: "Ehab Bazak", table: "Table 5" },
+            { name: "Nevine Abdelmalek", table: "Table 5" },
+            { name: "Ihab Tadros", table: "Table 6" },
+            { name: "Sherine Iskandar", table: "Table 6" },
+            { name: "Chris Tadros", table: "Table 6" },
+            { name: "Tia Bolous", table: "Table 6" },
+            { name: "Téta Marie Sadek", table: "Table 6" },
+            { name: "Salwa Tadros", table: "Table 6" },
+            { name: "Galal Tadros", table: "Table 6" },
+            { name: "Monique Tadros", table: "Table 6" },
+            { name: "Tasoni Wafaa Aziz", table: "Table 7" },
+            { name: "Eva Abdalla", table: "Table 7" },
+            { name: "Marie Aziz", table: "Table 7" },
+            { name: "Ayman Besada", table: "Table 7" },
+            { name: "Hannah Besada", table: "Table 7" },
+            { name: "Elijah Besada", table: "Table 7" },
+            { name: "Markos Aziz", table: "Table 7" },
+            { name: "Rachel Aziz", table: "Table 7" },
+            { name: "Matteo Aziz", table: "Table 7" }, // Fixed: Added comma here
+            { name: "Fady Hanna", table: "Table 8" },
+            { name: "Merna Rezk", table: "Table 8" },
+            { name: "Philomena Hanna", table: "Table 8" },
+            { name: "David Abdelmeseh", table: "Table 8" },
+            { name: "Mary Botros", table: "Table 8" },
+            { name: "Fouad Boules", table: "Table 8" },
+            { name: "Engy Kamel", table: "Table 8" },
+            { name: "Melina Boules", table: "Table 8" },
+            { name: "Tina Boules", table: "Table 8" },
+            { name: "Fam Ghabour", table: "Table 9" },
+            { name: "Nancy Hanna", table: "Table 9" },
+            { name: "Milando Ghabour", table: "Table 9" },
+            { name: "Luka Hodhod", table: "Table 9" },
+            { name: "Ramy Gerges", table: "Table 9" },
+            { name: "Marianne Takla", table: "Table 9" }, // Fixed: Added comma here
+            { name: "Antonio Gerges", table: "Table 9" },
+            { name: " Rafael Gerges", table: "Table 9" },
+            { name: " Antoine Abdel Malek", table: "Table 9" },
+            { name: "George Salib", table: "Table 10" },
+            { name: "Mariam Gergis", table: "Table 10" },
+            { name: "Mary Demian", table: "Table 10" },
+            { name: "Madonna Fawzy", table: "Table 10" },
+            { name: "Vebronia Salib", table: "Table 10" },
+            { name: "Ereny Mekhaiel", table: "Table 10" },
+            { name: "Maya Andraous", table: "Table 10" },
+            { name: "Mina Andraous", table: "Table 10" },
+            { name: "Aida Daoud", table: "Table 10" },
+            { name: "Alice Roufael", table: "Table 11" },
+            { name: "Mariam Youssef", table: "Table 11" },
+            { name: "Peter Hanna", table: "Table 11" },
+            { name: "Mina Mikhail", table: "Table 11" },
+            { name: "Christina Saad", table: "Table 11" },
+            { name: "Sanaa Saad", table: "Table 11" },
+            { name: "Elana Mikhail", table: "Table 11" },
+            { name: "Taline Mikhail", table: "Table 11" },
+            { name: "Dalia Attia", table: "Table 11" },
+            { name: "Mina Gerges", table: "Table 11" },
+            { name: "Marian Saad", table: "Table 12" },
+            { name: "Matteo Tadrous", table: "Table 12" },
+            { name: "Patrick Tadrous", table: "Table 12" },
+            { name: "Peter Tadrous", table: "Table 12" },
+            { name: "Fayza Habashy", table: "Table 12" },
+            { name: "Beshoy Rezk", table: "Table 12" },
+            { name: "Samia Kamel", table: "Table 12" },
+            { name: "Anthony Rezk", table: "Table 12" },
+            { name: "Ashraf Zekry", table: "Table 13" },
+            { name: "jano Seifen", table: "Table 13" },
+            { name: "Joussian Seifen", table: "Table 13" },
+            { name: "Adam Said", table: "Table 13" },
+            { name: "Nael Saied", table: "Table 13" },
+            { name: "Randa Saied", table: "Table 13" },
+            { name: "David Ghabour", table: "Table 13" },
+            { name: "Danial Ghabour", table: "Table 13" },
+            { name: "Kayla Boktor", table: "Table 13" },
+            { name: "Christa-Adeba Boktor", table: "Table 13" },
+            { name: "Ledia Ebrahim", table: "Table 14" },
+            { name: "Madonna Labib", table: "Table 14" },
+            { name: "Mario Saleh", table: "Table 14" },
+            { name: "Meli Saleh", table: "Table 14" },
+            { name: "Mybel Medhat", table: "Table 14" },
+            { name: "Michael Geriges", table: "Table 14" },
+            { name: "Myven Geriges", table: "Table 14" },
+            { name: "Rasha Naguib", table: "Table 14" },
+            { name: "Mora Matta", table: "Table 15" },
+            { name: "Elaria Hanna", table: "Table 15" },
+            { name: "Mariam Hanna", table: "Table 15" },
+            { name: "Jeremia Habashy", table: "Table 15" },
+            { name: "Mark Habashy", table: "Table 15" },
+            { name: "Maryam Hanna", table: "Table 15" },
+            { name: "Heba Illias", table: "Table 15" },
+            { name: "Melissa Girges", table: "Table 15" },
+            { name: "Bassem Awad", table: "Table 16" },
+            { name: "Jasmen Awad", table: "Table 16" },
+            { name: "Youssef Awad", table: "Table 16" },
+            { name: "Ayman Beniamin", table: "Table 16" },
+            { name: "Raymonda Meawad", table: "Table 16" },
+            { name: "Claudine Habib", table: "Table 16" },
+            { name: "Daniel Habib", table: "Table 16" },
+            { name: "Nader Yakob", table: "Table 16" },
+            { name: "Sheren Samuel", table: "Table 16" },
+            { name: "Jhonathan Nashed", table: "Table 17" },
+            { name: "Mariam Mekhaeil", table: "Table 17" },
+            { name: "Sameh Nashed", table: "Table 17" },
+            { name: "Mathew Beshara", table: "Table 17" },
+            { name: "Viola Labib", table: "Table 17" },
+            { name: "Ehab Aiad", table: "Table 17" },
+            { name: "Madonna Beshara", table: "Table 17" },
+            { name: "Miriam Magdy", table: "Table 17" },
+            { name: "Tharwat Nashed", table: "Table 17" },
+            { name: "Hany Maximos", table: "Table 17" },
+            { name: "Pearly Yacoub", table: "Table 18" },
+            { name: "Rania Farah", table: "Table 18" },
+            { name: "Clara Yacoub", table: "Table 18" },
+            { name: "Elaria Wahib", table: "Table 18" },
+            { name: "Hani Yacoub", table: "Table 18" },
+            { name: "Ragy Soryal", table: "Table 18" },
+            { name: "Sara Bichai", table: "Table 18" },
+            { name: "Amal Souryal", table: "Table 18" },
+            { name: "Joyce Soryal", table: "Table 18" },
+            { name: "Marcellino Soryal", table: "Table 18" },
+            { name: "Anthony Bebawy", table: "Table 19" },
+            { name: "Maged Bebawy", table: "Table 19" },
+            { name: "Marianne Bebawy", table: "Table 19" },
+            { name: "Tia Lea Bebawy", table: "Table 19" },
+            { name: "Maged Dawood", table: "Table 19" },
+            { name: "Giselle Bastawros", table: "Table 19" },
+            { name: "Hanna Soker", table: "Table 19" },
+            { name: "Joseph Ghabour", table: "Table 19" },
+            { name: "Maryhand Youssef", table: "Table 20" },
+            { name: "Marybelle Demyan", table: "Table 20" },
+            { name: "Cyril Demyan", table: "Table 20" },
+            { name: "George Mina", table: "Table 20" },
+            { name: "Enayat Azer", table: "Table 20" },
+            { name: "Jolie Mina", table: "Table 20" },
+            { name: "Maro Mina", table: "Table 20" },
+            { name: "Rania Abdou", table: "Table 20" },
+            { name: "Waasim Grees", table: "Table 21" },
+            { name: "Nermine Bassily", table: "Table 21" },
+            { name: "Patrick Grees", table: "Table 21" },
+            { name: "Raid Seifin", table: "Table 21" },
+            { name: "Mary Khair", table: "Table 21" },
+            { name: "Danie; Seifen", table: "Table 21" },
+            { name: "Rosalie Seifen", table: "Table 21" },
+            { name: "George Ayad", table: "Table 21" },
+            { name: "Ereny Ayad", table: "Table 21" },
+            { name: "Edward Ayad", table: "Table 21" },
+            { name: "Mirolla Said", table: "Table 22" },
+            { name: "Nabil Youssef", table: "Table 22" },
+            { name: "Madonna Attallah", table: "Table 22" },
+            { name: "Nahed Ibrahim", table: "Table 22" },
+            { name: "Emil Fahmi", table: "Table 22" },
+            { name: "mariam Abdelshahid", table: "Table 22" },
+            { name: "Mikaila Fahmi", table: "Table 22" },
+        ];
+
+        // This will be the list we actually work with and modify.
+        // We'll try to load it from localStorage first.
+        let guests = [];
+
+        // --- localStorage Functions ---
+
+        // Function to save the current 'guests' list to localStorage
+        function saveGuestsToLocalStorage() {
+            // localStorage can only store text (strings).
+            // So, we convert our 'guests' array (which is JavaScript objects)
+            // into a JSON string using JSON.stringify().
+            localStorage.setItem("guestCheckInList", JSON.stringify(guests));
+        }
+
+        // Function to load the 'guests' list from localStorage
+        function loadGuestsFromLocalStorage() {
+            // Try to get the saved list from localStorage using the key "guestCheckInList".
+            const storedGuests = localStorage.getItem("guestCheckInList");
+
+            if (storedGuests) {
+                // If there's something saved, convert it back from a JSON string
+                // into JavaScript objects using JSON.parse().
+                // Then, assign this loaded list to our 'guests' variable.
+                guests = JSON.parse(storedGuests);
+            } else {
+                // If nothing is saved (first time running or data cleared),
+                // we'll start with the 'originalGuests' list and
+                // add the 'checkedIn' property to each one.
+                guests = originalGuests.map(g => ({ ...g, checkedIn: false }));
+                // And then save this initial state.
+                saveGuestsToLocalStorage();
+            }
+        }
+
+        // --- Core Application Functions ---
+
+        // Function to display the guests in the table
+        // Now it can take an optional 'guestListToShow' for searching.
+        function renderGuests(guestListToShow = guests) {
+            const tbody = document.querySelector("#guestTable tbody");
+            tbody.innerHTML = ""; // Clear existing rows
+
+            guestListToShow.forEach((guest) => {
+                const row = document.createElement("tr");
+                if (guest.checkedIn) {
+                    row.classList.add("checked-in");
+                }
+
+                // We need to find the ORIGINAL index of the guest in the main 'guests' array
+                // because 'guestListToShow' might be a filtered list (for search).
+                const originalIndex = guests.findIndex(g => g.name === guest.name && g.table === guest.table);
+
+                row.innerHTML = `
+                    <td>${guest.name}</td>
+                    <td>${guest.table}</td>
+                    <td>
+                        <button onclick="toggleCheckIn(${originalIndex})">
+                            ${guest.checkedIn ? "✓ Checked In" : "Check In"}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Function to toggle the check-in status
+        function toggleCheckIn(index) {
+            // Change the 'checkedIn' status for the guest at the given index
+            guests[index].checkedIn = !guests[index].checkedIn;
+
+            // Save the updated list to localStorage immediately
+            saveGuestsToLocalStorage();
+
+            // Re-render the guests to update the table display
+            // We pass the current search value to make sure the filter is reapplied
+            const searchValue = document.getElementById("search").value.toLowerCase();
+            const filteredGuests = guests.filter(guest => guest.name.toLowerCase().includes(searchValue));
+            renderGuests(filteredGuests);
+        }
+
+        // --- Event Listeners ---
+
+        // Listen for changes in the search box
+        document.getElementById("search").addEventListener("input", function () {
+            const value = this.value.toLowerCase();
+            // Filter the main 'guests' array based on the search input
+            const filteredGuests = guests.filter(guest =>
+                guest.name.toLowerCase().includes(value)
+            );
+            // Re-render the table with only the filtered guests
+            renderGuests(filteredGuests);
+        });
+
+        // --- Initial Setup (when the page loads) ---
+
+        // 1. Load guest data (including check-in status) from localStorage
+        loadGuestsFromLocalStorage();
+
+        // 2. Display the guests in the table
+        renderGuests();
+    </script>
+</body>
+
+</html>
